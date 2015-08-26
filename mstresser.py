@@ -1,5 +1,4 @@
 # coding: utf-8
-import os
 import time
 import random
 import socket
@@ -28,8 +27,9 @@ def stresser(args):
     metric_args = (host, port, args.format, args.metric, args.interval, args.debug)
 
     processes = []
-    for _ in xrange(args.process):
-        p = Process(target=send_metrics, args=metric_args)
+    for i in xrange(args.process):
+        pname = 'process_%s' % i
+        p = Process(target=send_metrics, args=(pname,) + metric_args)
         p.start()
         processes.append(p)
 
@@ -42,15 +42,16 @@ def stresser(args):
         print 'KeyboardInterrupt'
 
 
-def send_metrics(host, port, format, num_metrics, interval, debug):
+def send_metrics(pname, host, port, format, num_metrics, interval, debug):
+    time.sleep(random.random() * interval)
     sock = socket.socket()
     try:
         sock.connect((host, port))
     except socket.error:
-        raise SystemError("Couldn't connect to %s on port %s" %
-                          (host, port))
-    process_id = os.getpid()
-    metrics = list(gen_metrics(process_id, num_metrics))
+        if not debug:
+            raise SystemError("Couldn't connect to %s on port %s" %
+                              (host, port))
+    metrics = list(gen_metrics(pname, num_metrics))
     while True:
         points = gen_metric_points(metrics, format)
         if debug:
@@ -69,20 +70,22 @@ def send_metrics(host, port, format, num_metrics, interval, debug):
 
 
 def gen_metrics(id_, num_metrics):
-    METRIC_PATTERN = 'stresser.process_id.{0}.metric_id.%s.metric_test'.format(id_)
+    METRIC_PATTERN = 'stresser.{0}.metric_id.%s.metric_test'.format(id_)
     for i in xrange(num_metrics):
         yield METRIC_PATTERN % str(i)
 
 
 def gen_metric_points(metrics, format):
-    val = random.random()
+    base_val = random.random()
     now = int(time.time())
-    if format == 'line':
-        r = ['%s %s %s' % (m, val, now) for m in metrics]
-    else:
-        # pickle
-        r = [(m, (now, val)) for m in metrics]
-    return r
+    points = []
+    for i, m in enumerate(metrics):
+        val = base_val + i
+        if format == 'line':
+            points.append("%s %s %s" % (m, val, now))
+        else:
+            points.append((m, (now, val)))
+    return points
 
 
 if __name__ == '__main__':
