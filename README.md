@@ -1,7 +1,7 @@
 # Metric Stresser
 
 A graphite metric stresser, this is inspired by [graphite-stresser](https://github.com/feangulo/graphite-stresser),
-which is a Java program, and can only test line format. I want test pickle easily.
+which is a Java program, and can only test line format. I want to test pickle easily.
 
 # Usage
 
