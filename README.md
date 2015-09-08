@@ -16,9 +16,9 @@ which is a Java program, and can only test line format. I want to test pickle ea
       -f {line,pickle}, --format {line,pickle}
                             Format of data.
       -p PROCESS, --process PROCESS
-                            Number of metrics for one process.
+                            Number of processes.
       -m METRIC, --metric METRIC
-                            Number of metrics.
+                            Number of metrics for one process.
       -i INTERVAL, --interval INTERVAL
                             Publish time interval.
       -d, --debug           Debug mode, send the metrics to terminal.
